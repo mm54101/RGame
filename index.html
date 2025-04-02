@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>لعبة رغد - تعلم الجافا</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@700&display=swap');
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Tajawal', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #FFF0F5;
+            color: #DB7093;
+            transition: background-color 0.5s;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            touch-action: manipulation;
+        }
+        
+        /* الخلفية المتحركة */
+        .bubbles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+            top: 0;
+            left: 0;
+        }
+        
+        .bubble {
+            position: absolute;
+            bottom: -100px;
+            background: rgba(255, 105, 180, 0.2);
+            border-radius: 50%;
+            animation: rise 10s infinite ease-in;
+        }
+        
+        .bubble:nth-child(1) {
+            width: 40px;
+            height: 40px;
+            left: 10%;
+            animation-duration: 8s;
+        }
+        
+        .bubble:nth-child(2) {
+            width: 20px;
+            height: 20px;
+            left: 20%;
+            animation-duration: 5s;
+            animation-delay: 1s;
+        }
+        
+        .bubble:nth-child(3) {
+            width: 50px;
+            height: 50px;
+            left: 35%;
+            animation-duration: 7s;
+            animation-delay: 2s;
+        }
+        
+        .bubble:nth-child(4) {
+            width: 80px;
+            height: 80px;
+            left: 50%;
+            animation-duration: 11s;
+            animation-delay: 0s;
+        }
+        
+        .bubble:nth-child(5) {
+            width: 35px;
+            height: 35px;
+            left: 55%;
+            animation-duration: 6s;
+            animation-delay: 1s;
+        }
+        
+        .bubble:nth-child(6) {
+            width: 45px;
+            height: 45px;
+            left: 65%;
+            animation-duration: 8s;
+            animation-delay: 3s;
+        }
+        
+        .bubble:nth-child(7) {
+            width: 25px;
+            height: 25px;
+            left: 75%;
+            animation-duration: 7s;
+            animation-delay: 2s;
+        }
+        
+        .bubble:nth-child(8) {
+            width: 80px;
+            height: 80px;
+            left: 80%;
+            animation-duration: 6s;
+            animation-delay: 1s;
+        }
+        
+        @keyframes rise {
+            0% {
+                bottom: -100px;
+                transform: translateX(0);
+            }
+            50% {
+                transform: translateX(100px);
+            }
+            100% {
+                bottom: 1080px;
+                transform: translateX(-200px);
+            }
+        }
+        
+        #game-container {
+            width: 100%;
+            height: 100%;
+            padding: 15px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            z-index: 1;
+            overflow-y: auto;
+        }
+        
+        #character-container {
+            position: relative;
+            margin: 10px auto;
+            flex-shrink: 0;
+        }
+        
+        #anime-character {
+            position: relative;
+            width: 180px;
+            height: 220px;
+            margin: 0 auto;
+            transition: all 0.3s;
+        }
+        
+        .character-state {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            transition: opacity 0.3s;
+            z-index: 2;
+        }
+        
+        #character-normal {
+            background-image: url('normal.png');
+            opacity: 1;
+        }
+        
+        #character-happy {
+            background-image: url('ha.png');
+            opacity: 0;
+        }
+        
+        #character-sad {
+            background-image: url('sad.png');
+            opacity: 0;
+        }
+        
+        #character-name {
+            font-family: 'Amiri', serif;
+            font-size: 2.2rem;
+            color: #FF69B4;
+            margin-top: -10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            background: linear-gradient(to right, #FF6B8B, #FF1493);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+            z-index: 3;
+        }
+
+        #question-box {
+            background-color: white;
+            border-radius: 15px;
+            padding: 15px;
+            margin: 10px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            position: relative;
+            z-index: 2;
+            flex-shrink: 0;
+        }
+        
+        #options-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 2;
+            flex-shrink: 0;
+        }
+        
+        .option-btn {
+            background-color: #FF69B4;
+            color: white;
+            border: none;
+            padding: 12px;
+            font-size: 1rem;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Tajawal', sans-serif;
+            position: relative;
+            overflow: hidden;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .option-btn:hover {
+            transform: scale(1.03);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        #score-container {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 2;
+            flex-shrink: 0;
+        }
+        
+        #progress-container {
+            width: 100%;
+            height: 8px;
+            background-color: #F0F0F0;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            position: relative;
+            z-index: 2;
+            flex-shrink: 0;
+        }
+        
+        #progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(to right, #FF6B8B, #FFD1DC);
+            transition: width 0.5s;
+        }
+        
+        #feedback-message {
+            min-height: 30px;
+            color: #FF69B4;
+            font-weight: bold;
+            margin: 8px 0;
+            position: relative;
+            z-index: 2;
+            flex-shrink: 0;
+        }
+        
+        .word-bubble {
+            position: absolute;
+            background-color: white;
+            border-radius: 15px;
+            padding: 8px 12px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            font-weight: bold;
+            animation: float-up 0.5s forwards;
+            z-index: 10;
+            font-size: 1.2rem;
+        }
+        
+        @keyframes float-up {
+            0% { transform: translateY(0) scale(0.8); opacity: 0; }
+            20% { transform: translateY(-20px) scale(1.1); opacity: 1; }
+            80% { transform: translateY(-80px) scale(1); opacity: 1; }
+            100% { transform: translateY(-100px) scale(0.5); opacity: 0; }
+        }
+        
+        .celebration {
+            position: absolute;
+            font-size: 24px;
+            animation: float-heart 4s linear forwards;
+            z-index: 5;
+            pointer-events: none;
+        }
+        
+        @keyframes float-heart {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-150px) rotate(360deg); opacity: 0; }
+        }
+        
+        .correct {
+            background-color: #4CAF50 !important;
+        }
+        
+        .incorrect {
+            background-color: #F44336 !important;
+        }
+        
+        #code-snippet {
+            background-color: #F8F8F8;
+            padding: 8px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 8px 0;
+            text-align: left;
+            direction: ltr;
+            font-size: 0.9rem;
+            overflow-x: auto;
+        }
+        
+        /* أنماط المفرقعات */
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            animation: confetti-fall 3s linear forwards;
+            z-index: 100;
+            pointer-events: none;
+        }
+        
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(1000px) rotate(720deg);
+                opacity: 0;
+            }
+        }
+        
+        /* تأثير النبض للشخصية عند الإجابة الصحيحة */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .pulse-effect {
+            animation: pulse 0.5s ease-in-out;
+        }
+        
+        @media (max-width: 480px) {
+            #anime-character {
+                width: 150px;
+                height: 180px;
+            }
+            
+            #character-name {
+                font-size: 1.8rem;
+            }
+            
+            #question-box {
+                font-size: 1rem;
+                padding: 10px;
+            }
+            
+            .option-btn {
+                padding: 10px;
+                font-size: 0.9rem;
+                min-height: 50px;
+            }
+            
+            #code-snippet {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- الخلفية المتحركة -->
+    <div class="bubbles">
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+    </div>
+    
+    <div id="game-container">
+        <div id="score-container">
+            النقاط: <span id="score">0</span> | السؤال: <span id="question-counter">1</span>/20
+        </div>
+        
+        <div id="progress-container">
+            <div id="progress-bar"></div>
+        </div>
+        
+        <div id="character-container">
+            <div id="anime-character">
+                <div id="character-normal" class="character-state"></div>
+                <div id="character-happy" class="character-state"></div>
+                <div id="character-sad" class="character-state"></div>
+            </div>
+            <div id="character-name">رغــد</div>
+        </div>
+        
+        <div id="question-box">
+            مرحباً! أنا رغد، هل أنت مستعد لتعلم الجافا؟
+        </div>
+        
+        <div id="feedback-message"></div>
+        
+        <div id="options-container">
+            <!-- سيتم ملء الخيارات بواسطة الجافاسكريبت -->
+        </div>
+    </div>
+
+    <script>
+        // حالة اللعبة
+        const gameState = {
+            score: 0,
+            currentQuestion: 0,
+            questionsAnswered: 0,
+            correctAnswers: 0
+        };
+
+        // أسئلة أساسيات الجافا
+        const questions = [
+            {
+                question: "ما هو الناتج التالي في الجافا؟",
+                code: "System.out.println(5 + 3 * 2);",
+                options: ["16", "11", "13", "خطأ في الصيغة"],
+                correctAnswer: 1,
+                explanation: "الناتج هو 11 لأن الضرب له أولوية أعلى من الجمع (3*2=6 ثم 5+6=11)"
+            },
+            {
+                question: "أي من هذه التعريفات صحيح لإنشاء متغير من نوع عدد صحيح في الجافا؟",
+                options: [
+                    "int x = 10;",
+                    "integer x = 10;",
+                    "Int x = new Int(10);",
+                    "كل ما سبق صحيح"
+                ],
+                correctAnswer: 0,
+                explanation: "الطريقة الصحيحة هي 'int x = 10;' حيث أن int هي الكلمة المفتاحية لتعريف الأعداد الصحيحة في الجافا"
+            },
+            {
+                question: "ما هو الغرض من الكلمة المفتاحية 'public' في الجافا؟",
+                options: [
+                    "تحديد أن المتغير أو الدالة يمكن الوصول إليها من أي مكان",
+                    "تحديد أن المتغير أو الدالة خاصة بالكلاس الحالي فقط",
+                    "جعل المتغير ثابتاً لا يتغير",
+                    "لا شيء مما سبق"
+                ],
+                correctAnswer: 0,
+                explanation: "'public' تعني أن العنصر يمكن الوصول إليه من أي مكان في البرنامج"
+            },
+            {
+                question: "ما هو الناتج التالي؟",
+                code: "String str = \"Java\";\nSystem.out.println(str.length());",
+                options: ["4", "3", "5", "يسبب خطأ"],
+                correctAnswer: 0,
+                explanation: "الناتج هو 4 لأن طول كلمة 'Java' هو 4 أحرف (دالة length() ترجع عدد الأحرف)"
+            },
+            {
+                question: "أي من هذه العبارات تستخدم لإنشاء كائن في الجافا؟",
+                code: "class Car {\n  String model;\n}",
+                options: [
+                    "Car myCar = Car();",
+                    "Car myCar = new Car();",
+                    "new Car myCar();",
+                    "Car myCar = create Car();"
+                ],
+                correctAnswer: 1,
+                explanation: "لإنشاء كائن في الجافا نستخدم الكلمة المفتاحية 'new' متبوعة باسم الكلاس وأقواس"
+            },
+            {
+                question: "ما هو نوع الحلقة التالية في الجافا؟",
+                code: "for(int i = 0; i < 5; i++) {\n  System.out.println(i);\n}",
+                options: [
+                    "حلقة while",
+                    "حلقة for",
+                    "حلقة do-while",
+                    "حلقة foreach"
+                ],
+                correctAnswer: 1,
+                explanation: "هذه هي صيغة حلقة for التقليدية في الجافا"
+            },
+            {
+                question: "ما هو الناتج التالي؟",
+                code: "int x = 5;\nSystem.out.println(x++);",
+                options: ["5", "6", "0", "يسبب خطأ"],
+                correctAnswer: 0,
+                explanation: "الناتج هو 5 لأن x++ تزيد القيمة بعد الطباعة، لو كانت ++x لكان الناتج 6"
+            },
+            {
+                question: "أي من هذه ليس نوع بيانات أساسي في الجافا؟",
+                options: ["int", "float", "String", "boolean"],
+                correctAnswer: 2,
+                explanation: "String ليس نوع بيانات أساسي في الجافا بل هو كلاس"
+            },
+            {
+                question: "ما هو الغرض من الكلمة المفتاحية 'static' في الجافا؟",
+                options: [
+                    "لجعل المتغير أو الدالة ينتمي للكلاس نفسه وليس للكائن",
+                    "لجعل المتغير ثابتاً لا يتغير",
+                    "لتعريف متغير عام",
+                    "كل ما سبق"
+                ],
+                correctAnswer: 0,
+                explanation: "'static' تعني أن العنصر ينتمي للكلاس نفسه وليس للكائنات المنشئة منه"
+            },
+            {
+                question: "كيف نحدد مصفوفة من الأعداد الصحيحة في الجافا؟",
+                options: [
+                    "int[] arr = new int[5];",
+                    "int arr[] = new int[5];",
+                    "Array<int> arr = new Array<int>(5);",
+                    "الإجابة 1 و 2 صحيحتان"
+                ],
+                correctAnswer: 3,
+                explanation: "كلا الطريقتين 1 و 2 صحيحتان لتعريف مصفوفة في الجافا"
+            },
+            {
+                question: "ما هو الناتج التالي؟",
+                code: "System.out.println(10 / 3);",
+                options: ["3", "3.333", "3.0", "4"],
+                correctAnswer: 0,
+                explanation: "الناتج هو 3 لأن القسمة بين عددين صحيحين تعطي عدداً صحيحاً"
+            },
+            {
+                question: "ما هو الفرق بين == و equals() في الجافا؟",
+                options: [
+                    "== يقارن القيم بينما equals() يقارن المراجع",
+                    "== يقارن المراجع بينما equals() يقارن القيم",
+                    "لا يوجد فرق بينهما",
+                    "equals() لا يوجد في الجافا"
+                ],
+                correctAnswer: 1,
+                explanation: "== يقارن المراجع (العناوين في الذاكرة) بينما equals() مصمم لمقارنة القيم"
+            },
+            {
+                question: "ما هو الناتج التالي؟",
+                code: "String s1 = \"Java\";\nString s2 = new String(\"Java\");\nSystem.out.println(s1 == s2);",
+                options: ["true", "false", "null", "يسبب خطأ"],
+                correctAnswer: 1,
+                explanation: "الناتج هو false لأن == يقارن المراجع و s1 و s2 يشيران إلى كائنين مختلفين في الذاكرة"
+            },
+            {
+                question: "ما هو نوع العلاقة بين الكلاسين التاليين؟",
+                code: "class Animal {}\nclass Dog extends Animal {}",
+                options: [
+                    "تجميع (Aggregation)",
+                    "تكوين (Composition)",
+                    "توارث (Inheritance)",
+                    "اقتران (Coupling)"
+                ],
+                correctAnswer: 2,
+                explanation: "هذه علاقة توارث حيث أن Dog يرث من Animal"
+            },
+            {
+                question: "ما هو الناتج التالي؟",
+                code: "int x = 5;\nSystem.out.println(x > 2 ? \"نعم\" : \"لا\");",
+                options: ["نعم", "لا", "true", "يسبب خطأ"],
+                correctAnswer: 0,
+                explanation: "الناتج هو 'نعم' لأن العبارة الشرطية المختصرة تعيد 'نعم' عندما يكون x > 2 صحيحاً"
+            },
+            {
+                question: "ما هو الغرض من الكلمة المفتاحية 'final' في الجافا؟",
+                options: [
+                    "منع التوريث أو التعديل",
+                    "تحديد أن المتغير ثابت",
+                    "تحديد أن الدالة لا يمكن تجاوزها",
+                    "جميع ما سبق"
+                ],
+                correctAnswer: 3,
+                explanation: "الكلمة المفتاحية 'final' يمكن استخدامها لمنع التعديل على المتغيرات، أو منع تجاوز الدوال، أو منع التوريث من الكلاس"
+            },
+            {
+                question: "ما هو الناتج التالي؟",
+                code: "System.out.println(\"Hello\".concat(\" World\"));",
+                options: [
+                    "Hello World",
+                    "HelloWorld",
+                    "Hello.concat(World)",
+                    "يسبب خطأ"
+                ],
+                correctAnswer: 0,
+                explanation: "دالة concat() تقوم بربط النصوص معاً وستعطي 'Hello World'"
+            },
+            {
+                question: "ما هو نوع الاستثناء التالي؟ NullPointerException",
+                options: [
+                    "استثناء مؤكد (Checked Exception)",
+                    "استثناء غير مؤكد (Unchecked Exception)",
+                    "خطأ (Error)",
+                    "لا شيء مما سبق"
+                ],
+                correctAnswer: 1,
+                explanation: "NullPointerException هو استثناء غير مؤكد (Unchecked Exception) لأنه يرث من RuntimeException"
+            },
+            {
+                question: "ما هو الناتج التالي؟",
+                code: "List<String> list = new ArrayList<>();\nlist.add(\"Java\");\nSystem.out.println(list.get(0));",
+                options: [
+                    "Java",
+                    "0",
+                    "null",
+                    "يسبب خطأ"
+                ],
+                correctAnswer: 0,
+                explanation: "الناتج هو 'Java' لأننا أضفنا هذه القيمة إلى الفهرس 0 في القائمة"
+            },
+            {
+                question: "ما هو الغرض من واجهة (interface) في الجافا؟",
+                options: [
+                    "تحديد سلوك يجب على الكلاس تنفيذه",
+                    "توفير تنفيذ افتراضي للدوال",
+                    "تخزين البيانات",
+                    "جميع ما سبق"
+                ],
+                correctAnswer: 0,
+                explanation: "الواجهة تحدد عقداً أو سلوكاً يجب على الكلاس الذي ينفذها أن يلتزم به"
+            }
+        ];
+
+        // العناصر
+        const animeCharacter = document.getElementById('anime-character');
+        const questionBox = document.getElementById('question-box');
+        const optionsContainer = document.getElementById('options-container');
+        const scoreDisplay = document.getElementById('score');
+        const questionCounter = document.getElementById('question-counter');
+        const progressBar = document.getElementById('progress-bar');
+        const feedbackMessage = document.getElementById('feedback-message');
+        const characterNormal = document.getElementById('character-normal');
+        const characterHappy = document.getElementById('character-happy');
+        const characterSad = document.getElementById('character-sad');
+
+        // تعبيرات الوجه
+        function showNormalFace() {
+            characterNormal.style.opacity = 1;
+            characterHappy.style.opacity = 0;
+            characterSad.style.opacity = 0;
+        }
+        
+        function showHappyFace() {
+            characterNormal.style.opacity = 0;
+            characterHappy.style.opacity = 1;
+            characterSad.style.opacity = 0;
+        }
+        
+        function showSadFace() {
+            characterNormal.style.opacity = 0;
+            characterHappy.style.opacity = 0;
+            characterSad.style.opacity = 1;
+        }
+
+        // بدء اللعبة
+        function startGame() {
+            gameState.currentQuestion = 0;
+            gameState.score = 0;
+            gameState.questionsAnswered = 0;
+            gameState.correctAnswers = 0;
+            updateScore();
+            showQuestion();
+            showNormalFace();
+        }
+
+        // عرض السؤال الحالي
+        function showQuestion() {
+            if (gameState.currentQuestion >= questions.length) {
+                endGame();
+                return;
+            }
+            
+            const question = questions[gameState.currentQuestion];
+            
+            // إنشاء محتوى السؤال
+            let questionContent = question.question;
+            
+            if (question.code) {
+                questionContent += `<div id="code-snippet">${question.code}</div>`;
+            }
+            
+            questionBox.innerHTML = questionContent;
+            questionCounter.textContent = gameState.currentQuestion + 1;
+            
+            // تحديث شريط التقدم
+            progressBar.style.width = `${(gameState.currentQuestion / questions.length) * 100}%`;
+            
+            // عرض الخيارات
+            optionsContainer.innerHTML = '';
+            question.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'option-btn';
+                button.textContent = option;
+                button.addEventListener('click', () => checkAnswer(index));
+                button.addEventListener('mouseenter', () => {
+                    showNormalFace();
+                });
+                button.addEventListener('mouseleave', () => {
+                    showNormalFace();
+                });
+                optionsContainer.appendChild(button);
+            });
+            
+            feedbackMessage.textContent = '';
+            showNormalFace();
+        }
+
+        // التحقق من الإجابة
+        function checkAnswer(selectedIndex) {
+            const question = questions[gameState.currentQuestion];
+            const isCorrect = selectedIndex === question.correctAnswer;
+            
+            // تحديث حالة اللعبة
+            gameState.questionsAnswered++;
+            if (isCorrect) {
+                gameState.score += 10;
+                gameState.correctAnswers++;
+                showHappyFace();
+                createConfetti();
+                animeCharacter.classList.add('pulse-effect');
+                setTimeout(() => {
+                    animeCharacter.classList.remove('pulse-effect');
+                }, 500);
+            } else {
+                showSadFace();
+            }
+            
+            // عرض التغذية الراجعة
+            if (isCorrect) {
+                feedbackMessage.textContent = "إجابة صحيحة! " + question.explanation;
+                feedbackMessage.style.color = "#4CAF50";
+                createSpeechBubble("وجعع صححح!", true);
+            } else {
+                feedbackMessage.textContent = "إجابة خاطئة. الإجابة الصحيحة هي: " + 
+                    question.options[question.correctAnswer] + ". " + question.explanation;
+                feedbackMessage.style.color = "#F44336";
+                createSpeechBubble("تفف غلط 🔪", false);
+            }
+            
+            // تحديث النقاط
+            updateScore();
+            
+            // تمييز الإجابات
+            highlightAnswers(question.correctAnswer, selectedIndex);
+            
+            // الانتقال للسؤال التالي بعد تأخير
+            setTimeout(() => {
+                gameState.currentQuestion++;
+                showQuestion();
+            }, 2000);
+        }
+
+        // إنشاء مفرقعات
+        function createConfetti() {
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+            
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = `${Math.random() * 100}%`;
+                confetti.style.width = `${5 + Math.random() * 10}px`;
+                confetti.style.height = `${5 + Math.random() * 10}px`;
+                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                
+                document.body.appendChild(confetti);
+                
+                setTimeout(() => {
+                    confetti.remove();
+                }, 3000);
+            }
+        }
+
+        // تمييز الإجابات الصحيحة والخاطئة
+        function highlightAnswers(correctIndex, selectedIndex) {
+            const options = optionsContainer.querySelectorAll('.option-btn');
+            
+            options.forEach((option, index) => {
+                if (index === correctIndex) {
+                    option.classList.add('correct');
+                } else if (index === selectedIndex && index !== correctIndex) {
+                    option.classList.add('incorrect');
+                }
+                
+                option.disabled = true;
+            });
+        }
+
+        // إنشاء فقاعة كلام
+        function createSpeechBubble(text, isPositive) {
+            const bubble = document.createElement('div');
+            bubble.className = 'word-bubble';
+            bubble.textContent = text;
+            bubble.style.color = isPositive ? "#4CAF50" : "#F44336";
+            
+            // وضع عشوائي حول الشخصية
+            const x = Math.random() * 100 - 50;
+            const y = Math.random() * 50 - 25;
+            
+            bubble.style.left = `calc(50% + ${x}px)`;
+            bubble.style.top = `calc(50% + ${y}px)`;
+            
+            document.getElementById('game-container').appendChild(bubble);
+            
+            // إزالة الفقاعة بعد انتهاء الرسوم المتحركة
+            
+        }
+
+        // تحديث النقاط
+        function updateScore() {
+            scoreDisplay.textContent = gameState.score;
+        }
+
+        // إنهاء اللعبة
+        function endGame() {
+            const accuracy = Math.round((gameState.correctAnswers / gameState.questionsAnswered) * 100);
+            questionBox.innerHTML = `انتهت الأسئلة! النتيجة النهائية: ${gameState.score} نقطة (${accuracy}% دقة)`;
+            optionsContainer.innerHTML = '<button class="option-btn" onclick="startGame()">العب مرة أخرى</button>';
+            
+            // عرض احتفال
+            createCelebration();
+            showHappyFace();
+            createConfetti();
+        }
+
+        // إنشاء احتفال
+        function createCelebration() {
+            const emojis = ['❤️', '✨', '🎉', '🌟', '🥳'];
+            
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const emoji = document.createElement('div');
+                    emoji.className = 'celebration';
+                    emoji.innerHTML = emojis[Math.floor(Math.random() * emojis.length)];
+                    emoji.style.left = `${Math.random() * 100}%`;
+                    emoji.style.top = `${Math.random() * 100 + 100}%`;
+                    emoji.style.fontSize = `${20 + Math.random() * 20}px`;
+                    
+                    document.getElementById('game-container').appendChild(emoji);
+                    
+                    setTimeout(() => {
+                        emoji.remove();
+                    }, 4000);
+                }, i * 100);
+            }
+        }
+
+        // بدء اللعبة عند تحميل الصفحة
+        window.onload = startGame;
+
+        // إصلاح مشكلة حجم الشاشة على الأجهزة المحمولة
+        function adjustViewport() {
+            const viewport = document.querySelector('meta[name="viewport"]');
+            if (window.innerWidth <= 480) {
+                viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+            } else {
+                viewport.setAttribute('content', 'width=device-width, initial-scale=1.0');
+            }
+        }
+
+        window.addEventListener('resize', adjustViewport);
+        adjustViewport();
+    </script>
+</body>
+</html>
